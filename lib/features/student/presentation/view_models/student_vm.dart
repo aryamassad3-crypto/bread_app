@@ -23,6 +23,8 @@ class StudentViewModel extends ChangeNotifier {
     room: '',
   );
 
+  bool _isLoggedIn = false;
+
   StudentViewModel(
     this._registerStudent,
     this._updateStudentReservation,
@@ -41,6 +43,7 @@ class StudentViewModel extends ChangeNotifier {
   String get floor => _student.floor;
   String get room => _student.room;
   bool get isReserved => _student.isReserved;
+  bool get isLoggedIn => _isLoggedIn;
 
   void _loadSavedStudent() {
     final savedStudent = _getStudent();
@@ -49,6 +52,26 @@ class StudentViewModel extends ChangeNotifier {
       _student = savedStudent;
       notifyListeners();
     }
+  }
+
+  bool login({
+    required String name,
+    required String password,
+  }) {
+    final valid = name.trim() == _student.name.trim() &&
+        password == _student.password;
+
+    if (valid) {
+      _isLoggedIn = true;
+      notifyListeners();
+    }
+
+    return valid;
+  }
+
+  void logout() {
+    _isLoggedIn = false;
+    notifyListeners();
   }
 
   Future<void> updateFaceImage(String path) async {
@@ -62,37 +85,38 @@ class StudentViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
- Future<void> registerStudent({
-  required String name,
-  required String password,
-  required String uniId,
-  required String phone,
-  required String unit,
-  required String floor,
-  required String room,
-}) async {
-  final student = Student(
-    name: name,
-    password: password,
-    universityId: uniId,
-    phone: phone,
-    unit: unit,
-    floor: floor,
-    room: room,
-    isReserved: false,
-    faceImagePath: _student.faceImagePath,
-  );
+  Future<void> registerStudent({
+    required String name,
+    required String password,
+    required String uniId,
+    required String phone,
+    required String unit,
+    required String floor,
+    required String room,
+  }) async {
+    final student = Student(
+      name: name,
+      password: password,
+      universityId: uniId,
+      phone: phone,
+      unit: unit,
+      floor: floor,
+      room: room,
+      isReserved: false,
+      faceImagePath: _student.faceImagePath,
+    );
 
-  await _registerStudent(student);
+    await _registerStudent(student);
 
-  _student = student;
-  notifyListeners();
-}
+    _student = student;
+    _isLoggedIn = false;
+    notifyListeners();
+  }
 
   Future<void> updateProfile(Student student) async {
-    // احتفظ بالصورة الحالية إذا لم يرسل التعديل صورة جديدة.
     final updatedStudent = student.copyWith(
-      faceImagePath: student.faceImagePath ?? _student.faceImagePath,
+      faceImagePath:
+          student.faceImagePath ?? _student.faceImagePath,
     );
 
     await _updateStudentProfile(updatedStudent);
@@ -108,7 +132,6 @@ class StudentViewModel extends ChangeNotifier {
 
     await _updateStudentReservation(_student, value);
 
-    // نستخدم النسخة التي أعادها تحديث الحجز حتى لا نفقد الصورة.
     _student = updatedStudent;
     notifyListeners();
   }

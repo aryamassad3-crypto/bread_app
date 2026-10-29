@@ -1,3 +1,4 @@
+import 'package:bread_app/features/student/presentation/views/home_view.dart';
 import 'package:flutter/material.dart';
 
 class OrderSuccessView extends StatelessWidget {
@@ -109,20 +110,67 @@ class OrderSuccessView extends StatelessWidget {
       ),
       // 🧭 شريط التنقل السفلي المنسق ليتطابق مع واجهات الطالب
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 3,
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        selectedItemColor: const Color(0xFFBC6C25),
-        unselectedItemColor: Colors.grey.shade400,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_rounded, size: 28), label: ""),
-          BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline_rounded, size: 24), label: ""),
-          BottomNavigationBarItem(icon: Icon(Icons.settings_outlined, size: 26), label: ""),
-          BottomNavigationBarItem(icon: Icon(Icons.person_outline_rounded, size: 26), label: ""),
-        ],
-      ),
+  currentIndex: 0,
+  type: BottomNavigationBarType.fixed,
+  backgroundColor: Colors.white,
+  selectedItemColor: const Color(0xFFBC6C25),
+  unselectedItemColor: Colors.grey.shade400,
+  showSelectedLabels: false,
+  showUnselectedLabels: false,
+  onTap: (index) {
+    switch (index) {
+      case 0:
+        // الرجوع إلى الصفحة السابقة (الرئيسية)
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        break;
+
+      case 1:
+        // فتح صفحة الشكاوى
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => const HomeView(initialIndex: 1),
+          ),
+        );
+        break;
+
+      case 2:
+        // فتح صفحة الإعدادات
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => const HomeView(initialIndex: 2),
+          ),
+        );
+        break;
+
+      case 3:
+        // فتح الملف الشخصي
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => const HomeView(initialIndex: 3),
+          ),
+        );
+        break;
+    }
+  },
+  items: const [
+    BottomNavigationBarItem(
+      icon: Icon(Icons.home_rounded, size: 28),
+      label: '',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.chat_bubble_outline_rounded, size: 24),
+      label: '',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.settings_outlined, size: 26),
+      label: '',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.person_outline_rounded, size: 26),
+      label: '',
+    ),
+  ],
+),
     );
   }
 }

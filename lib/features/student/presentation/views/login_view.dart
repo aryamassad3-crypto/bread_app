@@ -15,7 +15,9 @@ class LoginView extends StatefulWidget {
 class _LoginViewState extends State<LoginView> {
   final _nameController = TextEditingController();
   final _passwordController = TextEditingController();
+
   bool _isPasswordVisible = false;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -26,10 +28,7 @@ class _LoginViewState extends State<LoginView> {
 
   @override
   Widget build(BuildContext context) {
-    final studentVM = Provider.of<StudentViewModel>(
-      context,
-      listen: false,
-    );
+    final studentVM = context.read<StudentViewModel>();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -53,12 +52,15 @@ class _LoginViewState extends State<LoginView> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 20),
+
               Image.asset(
                 'lib/assets/images/cookies.png',
                 height: 160,
                 fit: BoxFit.contain,
               ),
+
               const SizedBox(height: 30),
+
               const Text(
                 "سجل دخولك الآن:",
                 textAlign: TextAlign.right,
@@ -68,9 +70,11 @@ class _LoginViewState extends State<LoginView> {
                   color: Colors.black,
                 ),
               ),
+
               const SizedBox(height: 20),
 
               _buildFieldTitle("الاسم الكامل"),
+
               TextField(
                 controller: _nameController,
                 textAlign: TextAlign.right,
@@ -78,9 +82,11 @@ class _LoginViewState extends State<LoginView> {
                   "أدخل اسمك الكامل الموحد",
                 ),
               ),
+
               const SizedBox(height: 15),
 
               _buildFieldTitle("كلمة المرور"),
+
               TextField(
                 controller: _passwordController,
                 obscureText: !_isPasswordVisible,
@@ -124,50 +130,59 @@ class _LoginViewState extends State<LoginView> {
               ),
 
               const SizedBox(height: 45),
+
               ElevatedButton(
-                onPressed: () {
-                  final enteredName = _nameController.text.trim();
-                  final enteredPassword =
-                      _passwordController.text.trim();
+                onPressed: _isLoading
+                    ? null
+                    : () {
+                        final enteredName =
+                            _nameController.text.trim();
+                        final enteredPassword =
+                            _passwordController.text;
 
-                  if (enteredName.isEmpty ||
-                      enteredPassword.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          "يرجى ملء الاسم وكلمة المرور أولاً!",
-                          textAlign: TextAlign.right,
-                        ),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                    return;
-                  }
+                        if (enteredName.isEmpty ||
+                            enteredPassword.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                "يرجى ملء الاسم وكلمة المرور أولاً!",
+                                textAlign: TextAlign.right,
+                              ),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                          return;
+                        }
 
-                  if (enteredName == studentVM.studentName &&
-                      enteredPassword == studentVM.studentPassword) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          "أهلاً بك مجدداً! تم تسجيل الدخول بنجاح.",
-                        ),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
+                        final success = studentVM.login(
+                          name: enteredName,
+                          password: enteredPassword,
+                        );
 
-                    context.go('/home');
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          "الاسم أو كلمة المرور غير متطابقة مع الحساب المسجل!",
-                          textAlign: TextAlign.right,
-                        ),
-                        backgroundColor: Colors.orange,
-                      ),
-                    );
-                  }
-                },
+                        if (!success) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                "الاسم أو كلمة المرور غير متطابقة مع الحساب المسجل!",
+                                textAlign: TextAlign.right,
+                              ),
+                              backgroundColor: Colors.orange,
+                            ),
+                          );
+                          return;
+                        }
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              "أهلاً بك مجدداً! تم تسجيل الدخول بنجاح.",
+                            ),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+
+                        context.go('/home');
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFBC6C25),
                   padding: const EdgeInsets.symmetric(vertical: 14),
@@ -187,6 +202,7 @@ class _LoginViewState extends State<LoginView> {
               ),
 
               const SizedBox(height: 25),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -212,6 +228,7 @@ class _LoginViewState extends State<LoginView> {
                   ),
                 ],
               ),
+
               const SizedBox(height: 30),
             ],
           ),
@@ -265,3 +282,4 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 }
+

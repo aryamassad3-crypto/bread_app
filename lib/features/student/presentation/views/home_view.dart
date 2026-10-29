@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -14,7 +13,12 @@ import 'profile_view.dart';
 import 'surplus_search_screen.dart';
 
 class HomeView extends StatefulWidget {
-  const HomeView({super.key});
+  final int initialIndex;
+
+  const HomeView({
+    super.key,
+    this.initialIndex = 0,
+  });
 
   @override
   State<HomeView> createState() => _HomeViewState();
@@ -23,9 +27,13 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   Timer? _countdownTimer;
 
-  Duration _remainingTime = const Duration(seconds: 5);
+  Duration _remainingTime = const Duration(
+    hours: 2,
+    minutes: 15,
+    seconds: 36,
+  );
 
-  int _currentIndex = 0;
+  late int _currentIndex;
   bool _isBooking = false;
 
   static const List<String> _pageTitles = [
@@ -41,6 +49,7 @@ class _HomeViewState extends State<HomeView> {
   @override
   void initState() {
     super.initState();
+    _currentIndex = widget.initialIndex.clamp(0, 4).toInt();
     _startTimer();
   }
 
@@ -57,11 +66,9 @@ class _HomeViewState extends State<HomeView> {
 
         if (_remainingTime.inSeconds <= 1) {
           timer.cancel();
-
           setState(() {
             _remainingTime = Duration.zero;
           });
-
           return;
         }
 
@@ -189,54 +196,83 @@ class _HomeViewState extends State<HomeView> {
             backgroundColor: const Color(0xFFBC6C25),
             elevation: 0,
             centerTitle: true,
-            leadingWidth: 80,
-            title: Text(
-              _pageTitles[_currentIndex],
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            leading: Padding(
-              padding: const EdgeInsets.only(left: 8),
-              child: IconButton(
-                icon: Icon(
-                  _currentIndex == 4
-                      ? Icons.notifications_rounded
-                      : Icons.notifications_none_rounded,
-                  color: Colors.white,
-                  size: 28,
-                ),
-                onPressed: () => _goToPage(4),
-              ),
-            ),
-            actions: [
-              Padding(
-                padding: const EdgeInsets.only(
-                  left: 16,
-                  top: 4,
-                  bottom: 4,
-                ),
-                child: _currentIndex == 0
-                    ? SizedBox(
-                        width: 45,
-                        height: 45,
-                        child: Image.asset(
-                          'lib/assets/images/cookies.png',
-                          fit: BoxFit.contain,
-                        ),
-                      )
-                    : IconButton(
+            automaticallyImplyLeading: false,
+            leading: const SizedBox.shrink(),
+            leadingWidth: 0,
+            titleSpacing: 0,
+            title: SizedBox(
+              width: double.infinity,
+              height: kToolbarHeight,
+              child: Stack(
+                children: [
+                  if (_currentIndex == 0) ...[
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: IconButton(
+                        tooltip: 'الإشعارات',
                         icon: const Icon(
-                          Icons.arrow_forward_ios_rounded,
+                          Icons.notifications_none_rounded,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                        onPressed: () => _goToPage(4),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: SizedBox(
+                          width: 45,
+                          height: 45,
+                          child: Image.asset(
+                            'lib/assets/images/cookies.png',
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ] else ...[
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: IconButton(
+                        tooltip: 'رجوع',
+                        icon: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
                           color: Colors.white,
                           size: 22,
                         ),
                         onPressed: () => _goToPage(0),
                       ),
+                    ),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: IconButton(
+                        tooltip: 'الإشعارات',
+                        icon: Icon(
+                          _currentIndex == 4
+                              ? Icons.notifications_rounded
+                              : Icons.notifications_none_rounded,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                        onPressed: () => _goToPage(4),
+                      ),
+                    ),
+                  ],
+                  Center(
+                    child: Text(
+                      _pageTitles[_currentIndex],
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
           body: _buildCurrentPage(isOrdered),
           bottomNavigationBar: BottomNavigationBar(
@@ -320,14 +356,14 @@ class _HomeViewState extends State<HomeView> {
             ),
             const SizedBox(height: 4),
             const Text(
-              'مخصصاتك اليومية: "1 ربطة فقط"',
+              'مخصصاتك اليومية',
               style: TextStyle(
-                fontSize: 13,
-                color: Colors.grey,
-                fontWeight: FontWeight.w500,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
               ),
             ),
-            const SizedBox(height: 35),
+            const SizedBox(height: 25),
             Center(
               child: Container(
                 width: 170,
@@ -381,9 +417,6 @@ class _HomeViewState extends State<HomeView> {
               ),
             ),
             const SizedBox(height: 30),
-
-            // قبل انتهاء الوقت يبقى العداد فقط.
-            // بعد انتهاء الوقت يظهر نص إغلاق الحجز.
             Center(
               child: isOrdered
                   ? const Text(
@@ -411,10 +444,9 @@ class _HomeViewState extends State<HomeView> {
                             color: Color(0xFF333333),
                             letterSpacing: 1.5,
                           ),
+                          textAlign: TextAlign.center,
                         ),
             ),
-
-            // زر الفائض لا يظهر إلا بعد انتهاء العداد.
             if (bookingClosed) ...[
               const SizedBox(height: 20),
               SizedBox(
@@ -432,9 +464,7 @@ class _HomeViewState extends State<HomeView> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFBC6C25),
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 16,
-                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -442,7 +472,6 @@ class _HomeViewState extends State<HomeView> {
                 ),
               ),
             ],
-
             const SizedBox(height: 40),
             GestureDetector(
               onTap: () => _goToPage(1),
@@ -495,9 +524,9 @@ class _HomeViewState extends State<HomeView> {
                       ),
                     ),
                     const Icon(
-                      Icons.arrow_back_ios_new_rounded,
+                      Icons.keyboard_arrow_left_rounded,
                       color: Colors.white70,
-                      size: 14,
+                      size: 20,
                     ),
                   ],
                 ),
