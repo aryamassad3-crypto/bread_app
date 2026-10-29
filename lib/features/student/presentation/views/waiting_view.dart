@@ -1,27 +1,33 @@
+
 import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'login_view.dart';
+import 'package:go_router/go_router.dart';
 
 class WaitingView extends StatefulWidget {
-  const WaitingView({Key? key}) : super(key: key);
+  const WaitingView({super.key});
 
   @override
   State<WaitingView> createState() => _WaitingViewState();
 }
 
 class _WaitingViewState extends State<WaitingView> {
+  Timer? _timer;
+
   @override
   void initState() {
     super.initState();
-    // ⏱️ العداد الذكي: محاكاة موافقة المعتمد بعد 3 ثوانٍ ونقله تلقائياً لصفحة الدخول
-    Timer(const Duration(seconds: 3), () {
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginView()),
-        );
-      }
+
+    _timer = Timer(const Duration(seconds: 3), () {
+      if (!mounted) return;
+      context.go('/login');
     });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -31,7 +37,7 @@ class _WaitingViewState extends State<WaitingView> {
       appBar: AppBar(
         backgroundColor: const Color(0xFFBC6C25),
         elevation: 0,
-        automaticallyImplyLeading: false, // إلغاء سهم الرجوع لأن الانتقال مؤقت وآلي
+        automaticallyImplyLeading: false,
       ),
       body: Container(
         width: double.infinity,
@@ -61,7 +67,7 @@ class _WaitingViewState extends State<WaitingView> {
             ),
             const SizedBox(height: 35),
             const Text(
-              "حسابك بانتظار تفعيل المعتمد...",
+              'حسابك بانتظار تفعيل المعتمد...',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 18,
@@ -71,7 +77,7 @@ class _WaitingViewState extends State<WaitingView> {
             ),
             const SizedBox(height: 10),
             const Text(
-              "جاري فحص المستندات والموافقة الحيوية التلقائية",
+              'جاري فحص المستندات والموافقة الحيوية التلقائية',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,

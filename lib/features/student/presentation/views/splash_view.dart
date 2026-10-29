@@ -1,24 +1,34 @@
+
 import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'register_view.dart';
+import 'package:go_router/go_router.dart';
 
 class SplashView extends StatefulWidget {
-  const SplashView({Key? key}) : super(key: key);
+  const SplashView({super.key});
 
   @override
   State<SplashView> createState() => _SplashViewState();
 }
 
 class _SplashViewState extends State<SplashView> {
+  Timer? _timer;
+
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 3), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const RegisterView()),
-      );
+
+    _timer = Timer(const Duration(seconds: 3), () {
+      if (!mounted) return;
+
+      context.go('/register');
     });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -41,13 +51,17 @@ class _SplashViewState extends State<SplashView> {
                     color: Color(0xFFDDA15E),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.bakery_dining, size: 80, color: Colors.white),
+                  child: const Icon(
+                    Icons.bakery_dining,
+                    size: 80,
+                    color: Colors.white,
+                  ),
                 );
               },
             ),
             const SizedBox(height: 30),
             const Text(
-              "خبزك واصل لسكنك",
+              'خبزك واصل لسكنك',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
